@@ -160,101 +160,101 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-// week
+// week CALCULATE here(if u want to run this code then uncomment below cide and then run the code)
 
-// Get users list grouped by weekday
-app.get("/users/list", async (req, res) => {
-  try {
-    const authorizationHeader = req.header("Authorization");
-    if (!authorizationHeader) {
-      return res
-        .status(400)
-        .json({ status_code: 400, message: "Authorization header missing" });
-    }
+// // Get users list grouped by weekday
+// app.get("/users/list", async (req, res) => {
+//   try {
+//     const authorizationHeader = req.header("Authorization");
+//     if (!authorizationHeader) {
+//       return res
+//         .status(400)
+//         .json({ status_code: 400, message: "Authorization header missing" });
+//     }
 
-    const token = authorizationHeader.replace("Bearer ", "");
-    // console.log("received token", token);
-    // console.log("Token to verify:", token);
-    console.log("Secret key:", process.env.SECRET_KEY);
-    const decoded = jwt.verify(token, process.env.SECRET_KEY); // Replace with your secret key
+//     const token = authorizationHeader.replace("Bearer ", "");
+//     // console.log("received token", token);
+//     // console.log("Token to verify:", token);
+//     console.log("Secret key:", process.env.SECRET_KEY);
+//     const decoded = jwt.verify(token, process.env.SECRET_KEY); // Replace with your secret key
 
-    const { week_number } = req.query;
-    const user = await User.findOne({ _id: decoded.userId });
+//     const { week_number } = req.query;
+//     const user = await User.findOne({ _id: decoded.userId });
 
-    // Get the start and end of the week for the provided week number
-    const weekStart = getWeekStart(week_number);
-    const weekEnd = getWeekEnd(week_number);
+//     // Get the start and end of the week for the provided week number
+//     const weekStart = getWeekStart(week_number);
+//     const weekEnd = getWeekEnd(week_number);
 
-    // Group users by weekday
-    const userByWeekday = await User.aggregate([
-      {
-        $match: {
-          register_at: {
-            $gte: new Date(weekStart),
-            $lt: new Date(weekEnd),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: {
-            $dayOfWeek: { date: "$register_at", timezone: "Asia/Calcutta" },
-          },
-          users: { $push: { name: "$name", email: "$email" } },
-        },
-      },
-      {
-        $project: {
-          dayOfWeek: "$_id",
-          users: 1,
-          _id: 0,
-        },
-      },
-    ]);
+//     // Group users by weekday
+//     const userByWeekday = await User.aggregate([
+//       {
+//         $match: {
+//           register_at: {
+//             $gte: new Date(weekStart),
+//             $lt: new Date(weekEnd),
+//           },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             $dayOfWeek: { date: "$register_at", timezone: "Asia/Calcutta" },
+//           },
+//           users: { $push: { name: "$name", email: "$email" } },
+//         },
+//       },
+//       {
+//         $project: {
+//           dayOfWeek: "$_id",
+//           users: 1,
+//           _id: 0,
+//         },
+//       },
+//     ]);
 
-    const response = {
-      status_code: 200,
-      message: "Users list grouped by weekday",
-      data: formatUserByWeekday(userByWeekday),
-    };
+//     const response = {
+//       status_code: 200,
+//       message: "Users list grouped by weekday",
+//       data: formatUserByWeekday(userByWeekday),
+//     };
 
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(400).json({ status_code: 400, message: error.message });
-  }
-});
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(400).json({ status_code: 400, message: error.message });
+//   }
+// });
 
-// Function to get the start of the week for a given week number
-function getWeekStart(weekNumber) {
-  // Adjust the timezone offset as needed
-  const now = moment().utcOffset("+05:30");
-  return now.clone().startOf("isoWeek").add(weekNumber, "weeks");
-}
+// // Function to get the start of the week for a given week number
+// function getWeekStart(weekNumber) {
+//   // Adjust the timezone offset as needed
+//   const now = moment().utcOffset("+05:30");
+//   return now.clone().startOf("isoWeek").add(weekNumber, "weeks");
+// }
 
-// Function to get the end of the week for a given week number
-function getWeekEnd(weekNumber) {
-  return getWeekStart(weekNumber).clone().endOf("isoWeek");
-}
+// // Function to get the end of the week for a given week number
+// function getWeekEnd(weekNumber) {
+//   return getWeekStart(weekNumber).clone().endOf("isoWeek");
+// }
 
-// Function to format the user list by weekday
-function formatUserByWeekday(userByWeekday) {
-  const weekdays = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const formattedData = {};
+// // Function to format the user list by weekday
+// function formatUserByWeekday(userByWeekday) {
+//   const weekdays = [
+//     "Sunday",
+//     "Monday",
+//     "Tuesday",
+//     "Wednesday",
+//     "Thursday",
+//     "Friday",
+//     "Saturday",
+//   ];
+//   const formattedData = {};
 
-  for (const userDay of userByWeekday) {
-    formattedData[weekdays[userDay.dayOfWeek - 1]] = userDay.users;
-  }
+//   for (const userDay of userByWeekday) {
+//     formattedData[weekdays[userDay.dayOfWeek - 1]] = userDay.users;
+//   }
 
-  return formattedData;
-}
+//   return formattedData;
+// }
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
